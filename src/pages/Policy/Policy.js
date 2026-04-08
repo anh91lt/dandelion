@@ -18,35 +18,35 @@ const Policy = () => (
           </h3>
           <p style={{ fontSize: "1.6rem", lineHeight: 1.6, marginBottom: 10 }}>
             Chúng mình nhận mua hộ hàng trên{" "}
-            <a target="_blank" href="https://www.amazon.co.jp/">
+            <a target="_blank" rel="noreferrer" href="https://www.amazon.co.jp/">
               Amazon
             </a>
             ,
-            <a target="_blank" href="https://www.rakuten.co.jp/">
+            <a target="_blank" rel="noreferrer" href="https://www.rakuten.co.jp/">
               Rakuten
             </a>
             ,
-            <a target="_blank" href="https://jp.mercari.com/">
+            <a target="_blank" rel="noreferrer" href="https://jp.mercari.com/">
               Mercari(NEW/2ND)
             </a>
             ,
-            <a target="_blank" href="https://jmty.jp/">
+            <a target="_blank" rel="noreferrer" href="https://jmty.jp/">
               Jimoty(2ND)
             </a>{" "}
             hay các trang thương mại khác như
-            <a target="_blank" href="https://www2.hm.com/ja_jp/index.html">
+            <a target="_blank" rel="noreferrer" href="https://www2.hm.com/ja_jp/index.html">
               HM
             </a>
             ,
-            <a target="_blank" href="https://zozo.jp/">
+            <a target="_blank" rel="noreferrer" href="https://zozo.jp/">
               ZOZOTOWN
             </a>
             ,
-            <a target="_blank" href="https://thebase.com/">
+            <a target="_blank" rel="noreferrer" href="https://thebase.com/">
               BASE
             </a>
             ,
-            <a target="_blank" href="https://jp.shein.com//">
+            <a target="_blank" rel="noreferrer" href="https://jp.shein.com//">
               SHEIN
             </a>
             ,...

@@ -6,7 +6,12 @@ import apiGetTokenClient from "../../middleWare/getTokenClient";
 import { DataContext } from "../../Provider/dataProvider";
 
 const API = process.env.REACT_APP_API_BASE_URL || "http://localhost:3001";
-const getData = (res) => res?.data?.result ?? res?.data ?? [];
+
+// Hàm bổ trợ: Đảm bảo dữ liệu trả về luôn là một mảng để tránh lỗi .map() hoặc for...of
+const getData = (res) => {
+  const result = res?.data?.result ?? res?.data;
+  return Array.isArray(result) ? result : [];
+};
 
 export default function Header() {
   const navigate = useNavigate();
@@ -36,19 +41,25 @@ export default function Header() {
         setCats(getData(rc));
         setDetails(getData(rd));
       } catch (e) {
-        console.error(e);
+        console.error("Lỗi tải danh mục:", e);
         setErr("Không tải được danh mục sản phẩm.");
       }
     })();
   }, []);
 
-  // Map detail theo cat
+  // Map detail theo cat (Đã sửa lỗi "is not iterable")
   const detailsByCat = useMemo(() => {
     const m = new Map();
+    
+    // Kiểm tra an toàn trước khi lặp
+    if (!Array.isArray(details)) return m;
+
     for (const d of details) {
-      const arr = m.get(d.cate_productId) || [];
-      arr.push(d);
-      m.set(d.cate_productId, arr);
+      if (d && d.cate_productId) {
+        const arr = m.get(d.cate_productId) || [];
+        arr.push(d);
+        m.set(d.cate_productId, arr);
+      }
     }
     return m;
   }, [details]);
@@ -92,7 +103,7 @@ export default function Header() {
   return (
     <header className="header">
       <div className="container">
-        {/* PC */}
+        {/* PHIÊN BẢN PC */}
         <div className="pc">
           <div className="header-main">
             <Link to="/">
@@ -119,63 +130,47 @@ export default function Header() {
                         </div>
                       )}
 
-                      {!err &&
-                        cats.map((cat) => (
-                          <div className="column" key={cat.id}>
-                            {/* Category -> bold */}
-                            <Link
-                              to={`/products?category=${encodeURIComponent(
-                                cat.id
-                              )}`}
-                              className="nav-cat fw-bold"
-                              title={cat.name}
-                            >
-                              {cat.name}
-                            </Link>
+                      {!err && cats.map((cat) => (
+                        <div className="column" key={cat.id}>
+                          <Link
+                            to={`/products?category=${encodeURIComponent(cat.id)}`}
+                            className="nav-cat fw-bold"
+                            title={cat.name}
+                          >
+                            {cat.name}
+                          </Link>
 
-                            {(detailsByCat.get(cat.id) || []).map((d) => (
-                              <Link
-                                key={d.id}
-                                to={`/products?category=${encodeURIComponent(
-                                  cat.id
-                                )}&detail=${encodeURIComponent(d.id)}`}
-                                className="nav-detail-link"
-                                title={d.name}
-                              >
-                                {d.name}
-                              </Link>
-                            ))}
-                          </div>
-                        ))}
+                          {(detailsByCat.get(cat.id) || []).map((d) => (
+                            <Link
+                              key={d.id}
+                              to={`/products?category=${encodeURIComponent(cat.id)}&detail=${encodeURIComponent(d.id)}`}
+                              className="nav-detail-link"
+                              title={d.name}
+                            >
+                              {d.name}
+                            </Link>
+                          ))}
+                        </div>
+                      ))}
                     </div>
                   </div>
                 </li>
 
                 <li className="navbar-item">
-                  <Link to="/travel" className="link">
-                    DU LỊCH
-                  </Link>
+                  <Link to="/travel" className="link">DU LỊCH</Link>
                 </li>
                 <li className="navbar-item">
-                  <Link to="/life" className="link">
-                    CUỘC SỐNG
-                  </Link>
+                  <Link to="/life" className="link">CUỘC SỐNG</Link>
                 </li>
                 <li className="navbar-item">
-                  <Link to="/contact" className="link">
-                    LIÊN HỆ
-                  </Link>
+                  <Link to="/contact" className="link">LIÊN HỆ</Link>
                 </li>
               </ul>
             </nav>
 
-            {/* SEARCH */}
+            {/* SEARCH AREA */}
             <div className="search_area">
-              <form
-                id="search-form-id"
-                className="search-form"
-                onSubmit={onSearchSubmit}
-              >
+              <form id="search-form-id" className="search-form" onSubmit={onSearchSubmit}>
                 <input
                   type="text"
                   className="search-form__input"
@@ -185,238 +180,111 @@ export default function Header() {
                   onChange={(e) => setKeyword(e.target.value)}
                 />
                 <button type="submit" className="search-form__btn">
-                  <img
-                    className="search_icon"
-                    src="/icons/search.svg"
-                    alt="icon"
-                  />
+                  <img className="search_icon" src="/icons/search.svg" alt="search" />
                 </button>
                 <button
                   type="reset"
-                  id="search-form__clear-id"
                   className="search-form__clear"
                   onClick={onSearchClear}
+                  style={{ visibility: keyword ? "visible" : "hidden" }}
                 >
-                  <img
-                    className="clear_icon"
-                    src="/icons/clear-thin.svg"
-                    alt="icon"
-                  />
+                  <img className="clear_icon" src="/icons/clear-thin.svg" alt="clear" />
                 </button>
               </form>
-              <div className="search-results" />
             </div>
 
-            {/* Auth + Admin */}
+            {/* AUTH & ADMIN AREA */}
             <div className="buttons auth-area">
               {isAdmin && (
-                <div
-                  className={`admin-menu ${adminOpen ? "is-open" : ""}`}
-                  ref={adminRef}
-                >
+                <div className={`admin-menu ${adminOpen ? "is-open" : ""}`} ref={adminRef}>
                   <button
                     type="button"
                     className="admin-toggle"
-                    aria-haspopup="menu"
-                    aria-expanded={adminOpen}
                     onClick={() => setAdminOpen((v) => !v)}
                   >
                     Quản lý <span className="admin-caret">▾</span>
                   </button>
 
-                  <div
-                    className="admin-dropdown"
-                    role="menu"
-                    aria-hidden={!adminOpen}
-                  >
-                    <li className="navbar-item">
-                      <Link
-                        to="/adproduct"
-                        className="admin-dd-item"
-                        role="menuitem"
-                        onClick={() => setAdminOpen(false)}
-                      >
-                        Sản phẩm
-                      </Link>
-                    </li>
-                    <Link
-                      to="/adlife"
-                      className="admin-dd-item"
-                      role="menuitem"
-                      onClick={() => setAdminOpen(false)}
-                    >
-                      Cuộc sống
-                    </Link>
-                    <Link
-                      to="/adtravel"
-                      className="admin-dd-item"
-                      role="menuitem"
-                      onClick={() => setAdminOpen(false)}
-                    >
-                      Du lịch
-                    </Link>
+                  <div className="admin-dropdown" role="menu">
+                    <Link to="/adproduct" className="admin-dd-item" onClick={() => setAdminOpen(false)}>Sản phẩm</Link>
+                    <Link to="/adlife" className="admin-dd-item" onClick={() => setAdminOpen(false)}>Cuộc sống</Link>
+                    <Link to="/adtravel" className="admin-dd-item" onClick={() => setAdminOpen(false)}>Du lịch</Link>
                   </div>
                 </div>
               )}
 
               {!isLoggedIn ? (
-                <Link to="/login" id="sign-in" className="sign-in">
-                  ĐĂNG NHẬP
-                </Link>
+                <Link to="/login" className="sign-in">ĐĂNG NHẬP</Link>
               ) : (
                 <>
-                  <h2 style={{ color: "#fff", fontSize: 16 }}>
-                    Xin Chào, {data?.username ?? "bạn"}
+                  <h2 style={{ color: "#fff", fontSize: 14, margin: "0 10px" }}>
+                    Chào, {data?.username ?? "bạn"}
                   </h2>
-                  <button onClick={handleLogout} className="sign-in logout-btn">
-                    ĐĂNG XUẤT
-                  </button>
+                  <button onClick={handleLogout} className="sign-in logout-btn">ĐĂNG XUẤT</button>
                 </>
               )}
             </div>
           </div>
         </div>
 
-        {/* MOBILE */}
+        {/* PHIÊN BẢN MOBILE */}
         <div className="mobile">
           <div className="mobile-header-main">
             <label className="navbar_mobile-btn1" htmlFor="nav-mobile-input">
-              <img
-                className="navbar_mobile-btn"
-                src="/icons/bars-solid.svg"
-                alt="navbar-btn"
-              />
+              <img className="navbar_mobile-btn" src="/icons/bars-solid.svg" alt="menu" />
             </label>
-            <input
-              type="checkbox"
-              hidden
-              id="nav-mobile-input"
-              className="nav-input"
-              style={{ display: "none" }}
-            />
+            <input type="checkbox" hidden id="nav-mobile-input" className="nav-input" />
             <label htmlFor="nav-mobile-input" className="nav_overlay"></label>
 
             <Link to="/">
-              <img
-                className="logo"
-                src="/logo/Kimanhshop.png"
-                alt="Kimanhshop"
-              />
+              <img className="logo" src="/logo/Kimanhshop.png" alt="Kimanhshop" />
             </Link>
 
             <nav className="navbar_mobile">
               <label htmlFor="nav-mobile-input" className="navbar_mobile-close">
-                <img
-                  className="navbar_mobile-close"
-                  src="/icons/xmark-solid.svg"
-                  alt="navbar_mobile"
-                />
+                <img className="navbar_mobile-close" src="/icons/xmark-solid.svg" alt="close" />
               </label>
 
               <ul className="navbar_mobile-list">
                 <li className="navbar_mobile-item">
-                  <Link to="/products" className="link">
-                    THÔNG TIN SẢN PHẨM
-                  </Link>
+                  <Link to="/products" className="link">THÔNG TIN SẢN PHẨM</Link>
                   <div className="navbar_mobile-content">
-                    <div className="row">
-                      {err && (
-                        <div style={{ padding: 12, color: "crimson" }}>
-                          {err}
-                        </div>
-                      )}
-                      {!err &&
-                        cats.map((cat) => (
-                          <div className="column" key={cat.id}>
-                            <Link
-                              to={`/products?category=${encodeURIComponent(
-                                cat.id
-                              )}`}
-                              className="nav-cat fw-bold"
-                              title={cat.name}
-                            >
-                              {cat.name}
-                            </Link>
-                            {(detailsByCat.get(cat.id) || []).map((d) => (
-                              <Link
-                                key={d.id}
-                                to={`/products?category=${encodeURIComponent(
-                                  cat.id
-                                )}&detail=${encodeURIComponent(d.id)}`}
-                                className="nav-detail-link"
-                                title={d.name}
-                              >
-                                {d.name}
-                              </Link>
-                            ))}
-                          </div>
+                    {!err && cats.map((cat) => (
+                      <div className="column" key={cat.id}>
+                        <Link to={`/products?category=${cat.id}`} className="nav-cat fw-bold">{cat.name}</Link>
+                        {(detailsByCat.get(cat.id) || []).map((d) => (
+                          <Link key={d.id} to={`/products?category=${cat.id}&detail=${d.id}`} className="nav-detail-link">
+                            {d.name}
+                          </Link>
                         ))}
-                    </div>
+                      </div>
+                    ))}
                   </div>
                 </li>
-
-                <li className="navbar_mobile-item">
-                  <Link to="/life" className="link">
-                    CUỘC SỐNG
-                  </Link>
-                </li>
-                <li className="navbar_mobile-item">
-                  <Link to="/travel" className="link">
-                    DU LỊCH
-                  </Link>
-                </li>
-                <li className="navbar_mobile-item">
-                  <Link to="/contact" className="link">
-                    LIÊN HỆ
-                  </Link>
-                </li>
+                <li className="navbar_mobile-item"><Link to="/life" className="link">CUỘC SỐNG</Link></li>
+                <li className="navbar_mobile-item"><Link to="/travel" className="link">DU LỊCH</Link></li>
+                <li className="navbar_mobile-item"><Link to="/contact" className="link">LIÊN HỆ</Link></li>
+                
                 {isAdmin && (
-                  <li
-                    className="navbar_mobile-item"
-                    style={{
-                      color: "#000",
-                      fontSize: "16px",
-                      marginTop: 20,
-                      paddingBottom: 20,
-                    }}
-                  >
+                  <li className="navbar_mobile-item">
                     <details className="mobile-admin">
-                      <summary>QUẢN LÝ</summary>
-                      <Link to="/adproduct" className="nav-detail-link">
-                        Sản phẩm
-                      </Link>
-                      <Link to="/adlife" className="nav-detail-link">
-                        Cuộc sống
-                      </Link>
-                      <Link to="/adtravel" className="nav-detail-link">
-                        Du lịch
-                      </Link>
+                      <summary style={{ padding: "10px 20px", fontWeight: "bold" }}>QUẢN LÝ</summary>
+                      <Link to="/adproduct" className="nav-detail-link" style={{ paddingLeft: 40 }}>Sản phẩm</Link>
+                      <Link to="/adlife" className="nav-detail-link" style={{ paddingLeft: 40 }}>Cuộc sống</Link>
+                      <Link to="/adtravel" className="nav-detail-link" style={{ paddingLeft: 40 }}>Du lịch</Link>
                     </details>
                   </li>
                 )}
-
-                <h2
-                  style={{
-                    color: "#000",
-                    fontSize: 16,
-                    marginTop: 20,
-                    marginBottom: 20,
-                    paddingLeft: 20,
-                  }}
-                >
-                  XIN CHÀO, {data?.username ?? "bạn"}
-                </h2>
               </ul>
 
-              <div className="buttons">
+              <div className="mobile-auth" style={{ padding: 20 }}>
+                <h2 style={{ fontSize: 14, marginBottom: 15 }}>
+                  XIN CHÀO, {data?.username?.toUpperCase() ?? "BẠN"}
+                </h2>
                 {!isLoggedIn ? (
-                  <Link to="/login" className="mobile-sign-in">
-                    Đăng nhập
-                  </Link>
+                  <Link to="/login" className="mobile-sign-in">Đăng nhập</Link>
                 ) : (
-                  <button onClick={handleLogout} className="mobile-sign-in">
-                    Đăng xuất
-                  </button>
+                  <button onClick={handleLogout} className="mobile-sign-in">Đăng xuất</button>
                 )}
               </div>
             </nav>
