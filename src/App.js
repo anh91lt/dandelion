@@ -30,7 +30,7 @@ function App() {
   // KHÔNG destructure thẳng để tránh lỗi khi context chưa sẵn sàng
   const ctx = useContext(DataContext);
   const isAuthed = !!ctx?.data;
-  const isAdmin = ctx?.data?.role === "1";
+  const isAdmin = String(ctx?.data?.role) === "1";
 
   return (
     <BrowserRouter>
