@@ -1,0 +1,27 @@
+1. Sử dụng Reactjs 
+
+2. Xây dựng chức năng đăng nhập bằng Google ID 
+
+3. Xây dựng chức năng đăng ký tài khoản của dandelion. 
+ 3.1. Tạo Database thông tin người dùng (ID, user name, số điện thoại, mail)
+ 3.2. Lưu thông tin đăng ký người dùng vào DB
+ 3.2. Xây dựng chức năng đăng nhập bằng thông tin người dùng đã đăng ký
+
+4. Tạo page quản trị, dùng để thêm sửa xóa các thông tin đăng trên web
+
+5. Tạo chức năng tìm kiếm trong ô tìm kiếm (gõ keyword sẽ ra các thông tin liên quan đến keyword)
+
+6. Deploy (tên miền, server,...)
+
+7. Đủ SEO, quảng cáo,...
+
+8. Sửa lại các chỗ chưa hợp lý về Layoyt, HTML, CSS, hình ảnh,... trong dự án
+
+(9. Hiện tại chưa làm chức năng giỏ hàng và thanh toán, tuy nhiên có định hướng chuẩn bị cho tương lai sẽ làm nên mình có thể tạo các chức năng chờ sẵn.)
+
+
+
+- Thêm field số điện thoại
+- Ảnh chi tiết sản phẩm không theo thứ tự -> không phải lỗi mà là tính năng, thay đổi thứ tự bằng cách vào database sửa vị trí (field 'position'). Khi thêm ảnh thì phần vị trí nó sẽ quyết định thứ tự hiển thị
+- Lỗi input trang liên hệ
+- Lỗi kích thước ảnh phần du lịch và cuộc sống

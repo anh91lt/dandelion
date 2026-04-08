@@ -1,0 +1,173 @@
+/* =============== Account (Login / Register) =============== */
+/* Nếu toàn site đã có token màu, bạn có thể bỏ khối :root này */
+:root{
+  --pm-bg: #f6f8fb;
+  --pm-card: #ffffff;
+  --pm-border: #e6e9ef;
+  --pm-text: #1f2430;
+  --pm-muted: #778195;
+
+  --pm-primary: #2d6cdf;
+  --pm-primary-600: #2357b4;
+  --pm-danger: #ef4444;
+
+  --pm-radius-lg: 16px;
+  --pm-radius-md: 12px;
+  --pm-shadow-sm: 0 4px 12px rgba(17, 24, 39, .06);
+  --pm-shadow-lg: 0 22px 60px rgba(17, 24, 39, .10);
+}
+
+/* =============== Layout =============== */
+.account-page{
+  min-height: 70vh;                 /* để còn nhìn thấy header/footer */
+  display: grid;
+  place-items: center;
+  padding: 48px 20px;
+  background: var(--pm-bg);
+}
+
+.account-card{
+  width: 100%;
+  max-width: 440px;
+  background: var(--pm-card);
+  border: 1px solid var(--pm-border);
+  border-radius: var(--pm-radius-lg);
+  box-shadow: var(--pm-shadow-sm);
+  padding: 28px 24px 24px;
+  animation: cardIn .18s ease-out;
+}
+
+@keyframes cardIn{
+  from { transform: translateY(6px); opacity: .85; }
+  to   { transform: translateY(0); opacity: 1; }
+}
+
+/* =============== Titles =============== */
+.account-title{
+  margin: 0 0 16px;
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--pm-text);
+  letter-spacing: .2px;
+  text-align: center;
+}
+
+/* =============== Social button =============== */
+.social-login-btn{
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  height: 48px;
+  padding: 0 14px;
+  border-radius: 12px;
+  border: 1px solid var(--pm-border);
+  background: #fff;
+  font-weight: 700;
+  color: #111827;
+  cursor: pointer;
+  transition: box-shadow .15s ease, transform .05s ease, border-color .15s ease;
+}
+.social-login-btn:hover{
+  box-shadow: var(--pm-shadow-sm);
+  transform: translateY(-1px);
+  border-color: #dfe3ea;
+}
+.social-login-btn img{
+  width: 20px; height: 20px; object-fit: contain;
+}
+
+/* =============== Divider =============== */
+.divider{
+  position: relative;
+  margin: 16px 0 18px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--pm-muted);
+}
+.divider::before,
+.divider::after{
+  content: "";
+  position: absolute;
+  top: 50%;
+  width: 35%;
+  height: 1px;
+  background: var(--pm-border);
+}
+.divider::before{ left: 0; }
+.divider::after{ right: 0; }
+
+/* =============== Form =============== */
+.account-card form{ margin-top: 6px; }
+
+.form-group{ margin-bottom: 14px; }
+
+.account-card .form-control{
+  width: 100%;
+  height: 48px;
+  border-radius: 12px;
+  border: 1px solid var(--pm-border);
+  background: #fff;
+  color: var(--pm-text);
+  padding: 10px 12px;
+  outline: none;
+  transition: box-shadow .15s ease, border-color .15s ease, background .15s ease;
+}
+.account-card .form-control::placeholder{ color: #9aa3b2; }
+.account-card .form-control:focus{
+  border-color: #c8d9ff;
+  box-shadow: 0 0 0 3px rgba(45,108,223,.15);
+  background: #fff;
+}
+.account-card .form-control:disabled{
+  background: #f3f5f9;
+  cursor: not-allowed;
+}
+
+/* =============== Submit button =============== */
+.submit-btn{
+  width: 100%;
+  height: 48px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--pm-primary);
+  color: #fff;
+  font-weight: 800;
+  cursor: pointer;
+  transition: background .15s ease, transform .05s ease, box-shadow .15s ease;
+}
+.submit-btn:hover{ background: var(--pm-primary-600); box-shadow: var(--pm-shadow-sm); }
+.submit-btn:active{ transform: translateY(1px); }
+.submit-btn:disabled{
+  opacity: .7;
+  cursor: wait;
+}
+
+/* =============== Bottom link =============== */
+.auth-switch{
+  margin-top: 14px;
+  text-align: center;
+  font-size: 14px;
+  color: var(--pm-muted);
+}
+.auth-switch a{
+  color: var(--pm-primary);
+  font-weight: 700;
+  text-decoration: none;
+}
+.auth-switch a:hover{ text-decoration: underline; }
+
+/* =============== Helper states (nếu muốn highlight lỗi) =============== */
+.input-error{
+  border-color: #fecaca !important;
+  box-shadow: 0 0 0 3px rgba(239,68,68,.12) !important;
+}
+.text-error{ color: var(--pm-danger); font-size: 13px; }
+
+/* =============== Responsive =============== */
+@media (max-width: 575.98px){
+  .account-card{ padding: 22px 18px; }
+  .account-title{ font-size: 22px; }
+  .social-login-btn, .submit-btn{ height: 46px; }
+}

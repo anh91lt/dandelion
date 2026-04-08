@@ -1,0 +1,103 @@
+/* Container */
+.td-container{
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 16px 12px 40px;
+}
+
+/* Breadcrumb */
+.td-breadcrumb{
+  font-size: 14px;
+  color:#6b7280;
+  margin-bottom: 12px;
+}
+.td-bc-link{
+  color:#2563eb;
+  text-decoration:none;
+}
+.td-bc-link:hover{ text-decoration:underline; }
+.td-bc-sep{ margin: 0 6px; color:#9ca3af; }
+.td-bc-current{ color:#111827; }
+
+/* Card helpers */
+.card{
+  background:#fff;
+  border:1px solid #e5e7eb;
+  border-radius:14px;
+  box-shadow: 0 2px 14px rgba(0,0,0,.04);
+}
+.card-body{ padding:16px; margin: 16px; text-justify: inter-word; line-height: 1.85;}
+
+/* Header */
+.td-header{ margin-bottom: 16px; }
+.td-title{
+  font-size: 28px;
+  line-height: 1.25;
+  font-weight: 800;
+  margin: 0 0 6px;
+  color:#111827;
+}
+.td-meta{ color:#6b7280; font-size:14px; }
+.td-location{ margin-top: 4px; color:#374151; }
+
+/* Article blocks */
+.td-article{ display:flex; flex-direction:column; gap:14px; }
+.td-block{ overflow:hidden; }
+
+.td-content .td-block-title{
+  margin: 14px 16px 0;
+  font-size:18px; font-weight:800; color:#111827;
+}
+.td-content .td-content-body{
+  color:#374151;
+  font-size:16px;
+  line-height:1.7;
+}
+
+/* Image block */
+.td-image { display: block; }
+.td-image .td-imgbox{
+  width: 60%;              /* đúng yêu cầu 60% */
+  aspect-ratio: 16 / 9;    /* KHUNG CỐ ĐỊNH 16:9 */
+  overflow: hidden;        /* cắt phần dư */
+  border-radius: 10px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Ảnh sẽ lấp đầy khung và tự bị cắt nếu là TikTok (9:16) */
+.td-image .td-img{
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;        /* auto crop về 16:9 */
+  object-position: center;  /* vùng trọng tâm, có thể đổi 'top'/'bottom' */
+}
+.td-caption{
+  font-size:13px;
+  color:#6b7280;
+  margin-top:8px;
+  text-align:center;
+}
+
+/* Footer note */
+.td-note{
+  margin-top: 18px;
+  padding: 12px 14px;
+  border-left: 4px solid #2563eb;
+  background: #f3f4f6;
+  border-radius: 8px;
+  color:#1f2937;
+}
+
+/* Responsive */
+@media (max-width: 1024px){
+  .td-title{ font-size:24px; }
+  .td-image .td-img{ width:60%; }
+}
+@media (max-width: 640px){
+  .td-container{ padding: 12px 10px 32px; }
+  .td-title{ font-size:22px; }
+  .card-body{ padding:12px; }
+  .td-image .td-img{ width:80%; border-radius:8px; }
+}

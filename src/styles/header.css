@@ -1,0 +1,61 @@
+
+.navbar_pc .navbar-list .navbar-item .navbar-content .nav-cat{
+  display:block;
+  font-weight: 600;        /* in đậm */
+  color:#111827;
+  margin-bottom:8px;
+  text-decoration:none;
+}
+/* Admin dropdown (PC) */
+.auth-area { display: flex; align-items: center; gap: 8px; }
+
+.admin-menu { position: relative; }
+.admin-toggle {
+  background: transparent;
+  color: #C9D2DA;
+  border: none;
+  padding: 12px 14px;
+  font-size: 1.6rem;
+  cursor: pointer;
+  border-radius: 6px;
+}
+.admin-toggle:hover { color: #fff; background: rgba(255,255,255,0.06); }
+.admin-caret { margin-left: 6px; font-size: 1.2rem; opacity: 0.8; }
+
+.admin-dropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  min-width: 180px;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.08);
+  border-radius: 8px;
+  padding: 6px;
+  display: none;           /* Ẩn mặc định */
+  z-index: 1000;
+}
+.admin-menu.is-open .admin-dropdown { display: block; }  /* Hiện khi click */
+
+.admin-dd-item {
+  display: block;
+  padding: 10px 12px;
+  font-size: 1.5rem;
+  color: #111827;
+  border-radius: 6px;
+}
+.admin-dd-item:hover {
+  background: #f3f4f6;
+  color: #0f172a;
+}
+
+/* Logout button giữ style giống link đăng nhập */
+.logout-btn {
+  background: transparent;
+  border: none;
+  color: #C9D2DA;
+  padding: 20px 8px;
+  font-size: 1.6rem;
+  cursor: pointer;
+}
+.logout-btn:hover { color: #fff; }
