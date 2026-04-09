@@ -315,10 +315,21 @@
   margin-top:6px; font-weight:800; color:#111827; font-size:16px;
 }
 .admin-ui .line-2, .admin-ui .line-3{
-  display:-webkit-box; -webkit-box-orient: vertical; overflow:hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
-.admin-ui .line-2{ -webkit-line-clamp: 2; }
-.admin-ui .line-3{ -webkit-line-clamp: 3; }
+
+.admin-ui .line-2{
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+}
+
+.admin-ui .line-3{
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+}
+
 .admin-ui .pf-section .pf-head{
   display:flex; align-items:center; justify-content:space-between;
   margin-bottom: 12px;
