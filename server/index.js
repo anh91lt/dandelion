@@ -2,6 +2,7 @@
 const express = require("express");
 const cors = require("cors");
 const path = require("path");
+require("dotenv").config({ path: path.join(__dirname, ".env") });
 const fs = require("fs");
 const bodyParser = require("body-parser");
 const multer = require("multer");
@@ -100,8 +101,20 @@ app.post(
   }
 );
 
-app.listen(3001, () => {
-  console.log("Server chạy port 3001");
-  console.log("PUBLIC_DIR :", PUBLIC_DIR);
-  console.log("UPLOADS_DIR:", UPLOADS_DIR);
+const { testConnection } = require("./connect");
+
+const PORT = Number(process.env.PORT || 3001);
+
+(async () => {
+  await testConnection();
+
+  app.listen(PORT, () => {
+    console.log(`Server chạy port ${PORT}`);
+    console.log("PUBLIC_DIR :", PUBLIC_DIR);
+    console.log("UPLOADS_DIR:", UPLOADS_DIR);
+  });
+})();
+
+process.on("unhandledRejection", (err) => {
+  console.error("Unhandled Rejection:", err);
 });

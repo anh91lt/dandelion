@@ -1,11 +1,17 @@
 const mysql = require("mysql2/promise");
+const path = require("path");
+require("dotenv").config({ path: path.join(__dirname, ".env") });
 
 // Cấu hình kết nối MySQL
 const config = {
-  host: "localhost",
-  user: "root", // Tên tài khoản MySQL
-  password: "", // Mật khẩu
-  database: "dandelion", // Tên cơ sở dữ liệu
+  host: process.env.DB_HOST || "127.0.0.1",
+  port: Number(process.env.DB_PORT || 3306),
+  user: process.env.DB_USER || "root",
+  password: process.env.DB_PASSWORD || "",
+  database: process.env.DB_NAME || "dandelion",
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0,
 };
 
 // Hàm kết nối và trả về pool
@@ -18,14 +24,13 @@ async function testConnection() {
     console.log("Kết nối MySQL thành công!");
     conn.release();
   } catch (err) {
-    console.error("Kết nối MySQL thất bại:", err);
-    throw err;
+    console.error("Kết nối MySQL thất bại:", err.code || err.message);
+    // Không throw để tránh crash khi khởi động
   }
 }
-
-testConnection();
 
 module.exports = {
   pool,
   mysql,
+  testConnection,
 };

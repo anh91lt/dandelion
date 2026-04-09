@@ -21,8 +21,19 @@ exports.update = function (req, res) {
 };
 
 exports.delete = function (req, res) {
-  const bookingID = req.params.bookingid;
-  model.delete(bookingID, function (err, data) {
-    res.send({ result: data, error: err });
+  const id = Number(req.params?.id ?? req.query?.id ?? req.body?.id);
+  if (!id) {
+    return res.status(400).json({ message: "Thiếu id detail category." });
+  }
+
+  model.delete(id, function (err, data) {
+    if (err) {
+      console.error("Delete detail category error:", err);
+      return res.status(500).json({
+        message: "Không xoá được Chi tiết loại.",
+        error: err?.sqlMessage || err?.message || err,
+      });
+    }
+    return res.json({ result: data, message: "Xoá thành công." });
   });
 };

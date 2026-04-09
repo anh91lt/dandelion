@@ -1,6 +1,5 @@
 // src/pages/productPage.js
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import axios from "axios";
 import apiGetTokenClient from "../../../middleWare/getTokenClient";
 import "../../styles/admin.css";
 
@@ -15,6 +14,33 @@ const getData = (res) => res?.data?.result ?? res?.data ?? [];
 /** render ảnh: nếu là relative (/Uploads/...) => ghép host 3001 */
 const toDisplayUrl = (url) =>
   !url ? "" : /^https?:|^data:/.test(url) ? url : `${API}${url}`;
+
+const normalizeImage = (im) => ({
+  ...im,
+  id: Number(im?.id),
+  productId: Number(
+    im?.product_id ?? im?.productId ?? im?.productID ?? im?.id_product
+  ),
+  imageUrl: im?.imageUrl ?? im?.image_url ?? im?.url ?? im?.image ?? "",
+  position: Number(im?.position ?? im?.pos ?? 0),
+});
+
+const uploadImageWithAuth = async (file, endpoint) => {
+  const fd = new FormData();
+  fd.append("image", file);
+
+  const res = await apiGetTokenClient.post(endpoint, fd, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+
+  return (
+    res?.data?.imageUrl ||
+    res?.data?.result?.imageUrl ||
+    res?.data?.url ||
+    res?.data?.result?.url ||
+    ""
+  );
+};
 
 export default function ProductPage() {
   // ==== STATE nguồn dữ liệu ====
@@ -96,7 +122,8 @@ export default function ProductPage() {
   };
   const loadImages = async () => {
     const res = await apiGetTokenClient.get(`${API}/product-image`);
-    setImages(getData(res));
+    const arr = getData(res);
+    setImages(Array.isArray(arr) ? arr.map(normalizeImage) : []);
   };
 
   useEffect(() => {
@@ -124,17 +151,23 @@ export default function ProductPage() {
 
   // ==== list theo chọn ====
   const detailsOfCat = useMemo(
-    () => details.filter((d) => d.cate_productId === selectedCat),
+    () =>
+      details.filter(
+        (d) => Number(d.cate_productId) === Number(selectedCat)
+      ),
     [details, selectedCat]
   );
   const productsOfDetail = useMemo(
-    () => products.filter((p) => p.detail_categoryId === selectedDetail),
+    () =>
+      products.filter(
+        (p) => Number(p.detail_categoryId) === Number(selectedDetail)
+      ),
     [products, selectedDetail]
   );
   const imagesOfSelectedForImage = useMemo(
     () =>
       images
-        .filter((im) => Number(im.product_id) === Number(imgProductId))
+        .filter((im) => Number(im.productId) === Number(imgProductId))
         .sort((a, b) => (a.position ?? 0) - (b.position ?? 0)),
     [images, imgProductId]
   );
@@ -183,8 +216,8 @@ export default function ProductPage() {
     if (!window.confirm("Xoá loại sản phẩm này?")) return;
     setLoading(true);
     try {
-      await apiGetTokenClient.delete(`${API}/category`, { data: { id } });
-      if (selectedCat === id) {
+      await deleteById(`${API}/category`, id);
+      if (Number(selectedCat) === Number(id)) {
         setSelectedCat("");
         setSelectedDetail("");
         setSelectedProduct("");
@@ -207,7 +240,7 @@ export default function ProductPage() {
     try {
       await apiGetTokenClient.post(`${API}/detail-category`, {
         name: detailName.trim(),
-        cate_productId: selectedCat,
+        cate_productId: Number(selectedCat),
       });
       setDetailName("");
       await loadDetails();
@@ -224,10 +257,8 @@ export default function ProductPage() {
     if (!window.confirm("Xoá chi tiết loại này?")) return;
     setLoading(true);
     try {
-      await apiGetTokenClient.delete(`${API}/detail-category`, {
-        data: { id },
-      });
-      if (selectedDetail === id) {
+      await deleteById(`${API}/detail-category`, id);
+      if (Number(selectedDetail) === Number(id)) {
         setSelectedDetail("");
         setSelectedProduct("");
         setImgProductId(null);
@@ -270,19 +301,13 @@ export default function ProductPage() {
     setLoading(true);
     setErr("");
     try {
-      // Nếu có chọn file cover -> upload trước
       let coverUrl = prodForm.image;
       if (coverFile) {
-        const fd = new FormData();
-        fd.append("image", coverFile);
-        const up = await axios.post(UPLOAD_URL, fd, {
-          headers: { "Content-Type": "multipart/form-data" },
-        });
-        coverUrl = up?.data?.imageUrl || coverUrl;
+        coverUrl = await uploadImageWithAuth(coverFile, UPLOAD_URL);
       }
 
       const payload = {
-        id: editingId || undefined, // khi PUT thì gửi id, POST thì bỏ
+        id: editingId || undefined,
         name: prodForm.name.trim(),
         description: prodForm.description ?? "",
         price: Number(prodForm.price) || 0,
@@ -297,14 +322,11 @@ export default function ProductPage() {
         manufacturer: prodForm.manufacturer ?? "",
         link: prodForm.link ?? "",
         image: coverUrl ?? "",
-        detail_categoryId: selectedDetail,
+        detail_categoryId: Number(selectedDetail),
       };
 
-      if (editingId) {
-        await apiGetTokenClient.put(`${API}/product`, payload);
-      } else {
-        await apiGetTokenClient.post(`${API}/product`, payload);
-      }
+      if (editingId) await apiGetTokenClient.put(`${API}/product`, payload);
+      else await apiGetTokenClient.post(`${API}/product`, payload);
 
       resetProductForm();
       await loadProducts();
@@ -312,9 +334,7 @@ export default function ProductPage() {
       console.error(e);
       setErr(
         e?.response?.data?.message ||
-          (editingId
-            ? "Không cập nhật được Sản phẩm."
-            : "Không thêm được Sản phẩm.")
+          `Không thêm/cập nhật được Sản phẩm (${e?.response?.status || "??"}).`
       );
     } finally {
       setLoading(false);
@@ -372,37 +392,37 @@ export default function ProductPage() {
       return alert("Hãy chọn ít nhất 1 file ảnh để upload.");
 
     setLoading(true);
+    setErr("");
     try {
       let pos = Number(imgStartPos) || 0;
 
       for (const file of imgFiles) {
-        const fd = new FormData();
-        fd.append("image", file);
+        const relativeUrl = await uploadImageWithAuth(file, UPLOAD_URL);
+        if (!relativeUrl) throw new Error("Upload ảnh thất bại: không nhận được imageUrl.");
 
-        // Upload file -> nhận relative "/Uploads/xxx"
-        const upRes = await axios.post(UPLOAD_URL, fd, {
-          headers: { "Content-Type": "multipart/form-data" },
+        // gửi nhiều key để tương thích backend cũ/mới
+        await apiGetTokenClient.post(`${API}/product-image`, {
+          product_id: Number(imgProductId),
+          productId: Number(imgProductId),
+          imageUrl: relativeUrl,
+          image: relativeUrl,
+          alt: imgAlt ?? "",
+          position: pos++,
         });
-        const relativeUrl = upRes?.data?.imageUrl;
-        if (relativeUrl) {
-          await apiGetTokenClient.post(`${API}/product-image`, {
-            product_id: Number(imgProductId),
-            imageUrl: relativeUrl,
-            alt: imgAlt ?? "",
-            position: pos++,
-          });
-        }
       }
 
-      // reset bộ nhập
       setImgFiles([]);
       setImgAlt("");
       setImgStartPos(pos);
-
       await loadImages();
     } catch (e) {
       console.error(e);
-      setErr(e?.response?.data?.message || "Không thêm được ảnh.");
+      setErr(
+        e?.response?.data?.message ||
+        e?.response?.data?.error ||
+        e?.message ||
+        `Không thêm được ảnh (${e?.response?.status || "??"}).`
+      );
     } finally {
       setLoading(false);
     }
@@ -450,9 +470,7 @@ export default function ProductPage() {
                   {categories.map((c) => (
                     <div
                       key={c.id}
-                      className={`badge ${
-                        selectedCat === c.id ? "bg-primary" : ""
-                      }`}
+                      className={`badge ${Number(selectedCat) === Number(c.id) ? "bg-primary" : ""}`}
                       style={{ cursor: "pointer" }}
                       onClick={() => {
                         setSelectedCat(c.id);
@@ -505,9 +523,7 @@ export default function ProductPage() {
                   {detailsOfCat.map((d) => (
                     <div
                       key={d.id}
-                      className={`badge ${
-                        selectedDetail === d.id ? "bg-success" : ""
-                      }`}
+                      className={`badge ${Number(selectedDetail) === Number(d.id) ? "bg-success" : ""}`}
                       style={{ cursor: "pointer" }}
                       onClick={() => {
                         setSelectedDetail(d.id);
@@ -998,7 +1014,7 @@ export default function ProductPage() {
                 <div>
                   Danh sách sản phẩm (thuộc chi tiết:{" "}
                   <strong>
-                    {details.find((d) => d.id === selectedDetail)?.name || 0}
+                    {details.find((d) => Number(d.id) === Number(selectedDetail))?.name || "—"}
                   </strong>
                   )
                 </div>
@@ -1113,3 +1129,33 @@ export default function ProductPage() {
     </div>
   );
 }
+
+/**
+ * Gọi DELETE linh hoạt để tương thích nhiều kiểu backend:
+ * 1) DELETE /resource/:id
+ * 2) DELETE /resource?id=...
+ * 3) DELETE /resource  (body: {id})
+ */
+const deleteById = async (baseUrl, id) => {
+  const idVal = Number(id);
+
+  const attempts = [
+    () => apiGetTokenClient.delete(`${baseUrl}/${idVal}`),
+    () => apiGetTokenClient.delete(baseUrl, { params: { id: idVal } }),
+    () => apiGetTokenClient.delete(baseUrl, { data: { id: idVal } }),
+  ];
+
+  let lastError = null;
+  for (const req of attempts) {
+    try {
+      return await req();
+    } catch (e) {
+      lastError = e;
+      const status = e?.response?.status;
+      // thử kiểu khác nếu route không khớp
+      if ([400, 404, 405].includes(status)) continue;
+      throw e;
+    }
+  }
+  throw lastError || new Error("Delete request failed");
+};
