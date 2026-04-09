@@ -421,8 +421,9 @@ export default function ProductPage() {
         e?.response?.data?.message ||
         e?.response?.data?.error ||
         e?.message ||
-        `Không thêm được ảnh (${e?.response?.status || "??"}).`
-      );
+         (typeof e === "object" ? JSON.stringify(e) : String(e)) ||
+    `Không thêm được ảnh (${e?.response?.status || "??"}).`
+  );
     } finally {
       setLoading(false);
     }
@@ -446,7 +447,7 @@ export default function ProductPage() {
           </div>
         </div>
 
-        {err && <div className="alert alert-danger ad-my-3">{err}</div>}
+        {err && <div className="alert alert-danger ad-my-3">{typeof err === "string" ? err : JSON.stringify(err)}</div>}
         {loading && <div className="alert alert-info ad-my-3">Đang xử lý…</div>}
 
         <div className="ad-pm-grid">
